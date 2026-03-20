@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCV Pro v2.2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --text-dim: #94a3b8; --success: #4ade80; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; box-sizing: border-box; }
+        .container { background: var(--card); padding: 1.5rem; border-radius: 24px; width: 100%; max-width: 400px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
+        h1 { font-size: 1.2rem; color: var(--accent); text-align: center; margin-bottom: 1rem; }
+        .status { font-size: 0.7rem; color: var(--text-dim); text-align: center; margin-bottom: 1rem; }
+        .tasa-box { background: rgba(56, 189, 248, 0.05); border-radius: 16px; padding: 1rem; margin-bottom: 1.5rem; border: 1px dashed var(--accent); text-align: center; }
+        .tasa-valor { font-size: 2rem; font-weight: 800; margin: 5px 0; color: var(--success); }
+        .input-group { margin-bottom: 1rem; text-align: left; }
+        label { display: block; font-size: 0.75rem; margin-bottom: 5px; color: var(--text-dim); }
+        .input-wrapper { position: relative; }
+        .input-wrapper span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-size: 0.9rem; }
+        input { width: 100%; padding: 12px 12px 12px 35px; background: #0f172a; border: 1px solid #334155; border-radius: 12px; color: white; font-size: 1.1rem; box-sizing: border-box; }
+        .igtf-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.85rem; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(20px); }
+        .copy-btn { background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; text-decoration: underline; margin-top: 10px; width: 100%; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>BCV Converter <small style="opacity:0.5">v2.2</small></h1>
+    <div id="fecha" class="status">Sincronizando...</div>
+
+    <div class="tasa-box">
+        <div style="font-size: 0.7rem; color: var(--accent);">TASA OFICIAL USD/VES</div>
+        <div id="tasa-display" class="tasa-valor">0.00</div>
+    </div>
+
+    <div class="input-group">
+        <label>USD - Dólares</label>
+        <div class="input-wrapper"><span>$</span><input type="number" id="input-usd" placeholder="0.00" oninput="convertir('USD')"></div>
+    </div>
+
+    <div class="input-group">
+        <label>VES - Bolívares</label>
+        <div class="input-wrapper"><span>Bs</span><input type="number" id="input-ves" placeholder="0.00" oninput="convertir('VES')"></div>
+    </div>
+
+    <div class="igtf-row">
+        <span>Incluir IGTF (3%)</span>
+        <label class="switch">
+            <input type="checkbox" id="igtf-check" onchange="convertir('USD')">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <button class="copy-btn" onclick="copiar()">Copiar resultado</button>
+</div>
+
+<script>
+    // 🔗 PEGA TU URL DE APP WEB AQUÍ:
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyNM41pbVKMjKcTCFl_YrzAJl6jY3Lsqsuqs8XVyqeZOOv1UrfXfyyn1wQx1yV6FYazww/exec";
+
+    let tasaActual = 0;
+
+    async function obtenerDatos() {
+        try {
+            const res = await fetch(WEB_APP_URL);
+            const data = await res.json();
+            if(data.tasa) {
+                tasaActual = parseFloat(data.tasa);
+                document.getElementById('tasa-display').innerText = tasaActual.toFixed(4);
+                document.getElementById('fecha').innerText = "Corte: " + data.actualizacion;
+            }
+        } catch (e) {
+            document.getElementById('fecha').innerText = "⚠️ Error de enlace";
+        }
+    }
+
+    function convertir(origen) {
+        if (tasaActual === 0) return;
+        const usdIn = document.getElementById('input-usd');
+        const vesIn = document.getElementById('input-ves');
+        const igtf = document.getElementById('igtf-check').checked;
+        const factorIgtf = igtf ? 1.03 : 1;
+
+        if (origen === 'USD') {
+            const v = parseFloat(usdIn.value);
+            vesIn.value = !isNaN(v) ? (v * tasaActual * factorIgtf).toFixed(2) : "";
+        } else {
+            const v = parseFloat(vesIn.value);
+            usdIn.value = !isNaN(v) ? (v / (tasaActual * factorIgtf)).toFixed(2) : "";
+        }
+    }
+
+    function copiar() {
+        const ves = document.getElementById('input-ves').value;
+        if(ves) {
+            navigator.clipboard.writeText(ves + " Bs");
+            alert("¡Copiado al portapapeles!");
+        }
+    }
+
+    window.onload = obtenerDatos;
+</script>
+
+</body>
+</html>
