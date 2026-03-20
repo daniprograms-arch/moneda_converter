@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BCV Pro v2.2</title>
+    <title>BCV Pro v2.3</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --text-dim: #94a3b8; --success: #4ade80; }
@@ -26,17 +26,21 @@
         input:checked + .slider { background-color: var(--accent); }
         input:checked + .slider:before { transform: translateX(20px); }
         .copy-btn { background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; text-decoration: underline; margin-top: 10px; width: 100%; }
+        
+        /* Estilo para el nuevo link del BCV */
+        .bcv-link { display: block; text-align: center; margin-top: 20px; font-size: 0.7rem; color: var(--text-dim); text-decoration: none; transition: 0.3s; opacity: 0.7; }
+        .bcv-link:hover { color: var(--accent); opacity: 1; text-decoration: underline; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>BCV Converter <small style="opacity:0.5">v2.2</small></h1>
+    <h1>BCV Converter <small style="opacity:0.5">v2.3</small></h1>
     <div id="fecha" class="status">Sincronizando...</div>
 
     <div class="tasa-box">
         <div style="font-size: 0.7rem; color: var(--accent);">TASA OFICIAL USD/VES</div>
-        <div id="tasa-display" class="tasa-valor">0.00</div>
+        <div id="tasa-display" class="tasa-valor">0,00</div>
     </div>
 
     <div class="input-group">
@@ -57,14 +61,23 @@
         </label>
     </div>
 
-    <button class="copy-btn" onclick="copiar()">Copiar resultado</button>
+    <button class="copy-btn" onclick="copiar()">Copiar monto formateado (Bs.)</button>
+    
+    <a href="https://www.bcv.org.ve/" target="_blank" class="bcv-link">
+        🌐 Consultar BCV Oficial (Página del Banco)
+    </a>
 </div>
 
 <script>
-    // 🔗 PEGA TU URL DE APP WEB AQUÍ:
+    // 🔗 RECUERDA PEGAR TU URL AQUÍ
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyNM41pbVKMjKcTCFl_YrzAJl6jY3Lsqsuqs8XVyqeZOOv1UrfXfyyn1wQx1yV6FYazww/exec";
 
     let tasaActual = 0;
+
+    // Función para poner puntos de miles y comas decimales
+    function formatearParaMostrar(numero) {
+        return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(numero);
+    }
 
     async function obtenerDatos() {
         try {
@@ -72,11 +85,12 @@
             const data = await res.json();
             if(data.tasa) {
                 tasaActual = parseFloat(data.tasa);
-                document.getElementById('tasa-display').innerText = tasaActual.toFixed(4);
+                // Aquí aplicamos el formato de miles al número grande
+                document.getElementById('tasa-display').innerText = formatearParaMostrar(tasaActual);
                 document.getElementById('fecha').innerText = "Corte: " + data.actualizacion;
             }
         } catch (e) {
-            document.getElementById('fecha').innerText = "⚠️ Error de enlace";
+            document.getElementById('fecha').innerText = "⚠️ Error de conexión";
         }
     }
 
@@ -99,8 +113,10 @@
     function copiar() {
         const ves = document.getElementById('input-ves').value;
         if(ves) {
-            navigator.clipboard.writeText(ves + " Bs");
-            alert("¡Copiado al portapapeles!");
+            // Formateamos el número antes de copiarlo al portapapeles
+            const montoFormateado = formatearParaMostrar(parseFloat(ves));
+            navigator.clipboard.writeText(montoFormateado + " Bs.");
+            alert("Copiado: " + montoFormateado + " Bs.");
         }
     }
 
