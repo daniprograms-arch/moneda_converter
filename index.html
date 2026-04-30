@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>CONSULTA DEL DIA v2.5</title>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -204,7 +206,6 @@
     const STORAGE_KEY = 'bcv_converter_v2.5';
     let tasaActual = 0;
 
-    // Elementos del DOM
     const tasaDisplay = document.getElementById('tasa-display');
     const fechaEl = document.getElementById('fecha');
     const inputUSD = document.getElementById('input-usd');
@@ -229,7 +230,6 @@
                 tasaDisplay.classList.remove('outdated');
                 const fechaTexto = data.actualizacion || '';
                 fechaEl.innerHTML = '✅ ' + fechaTexto;
-                // Guardar en localStorage
                 const cache = { tasa: data.tasa, fecha: fechaTexto, timestamp: Date.now() };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(cache));
             } else {
@@ -237,7 +237,6 @@
             }
         } catch (e) {
             console.warn('Error al obtener tasa:', e.message);
-            // Intentar cargar desde localStorage
             const cached = localStorage.getItem(STORAGE_KEY);
             if (cached) {
                 try {
@@ -285,6 +284,12 @@
     }
 
     window.onload = obtenerDatos;
+</script>
+<!-- Registrar el Service Worker -->
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js');
+  }
 </script>
 </body>
 </html>
