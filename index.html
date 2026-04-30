@@ -2,44 +2,173 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CONSULTA DEL DIA v2.3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>CONSULTA DEL DIA v2.5</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --text-dim: #94a3b8; --success: #4ade80; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; box-sizing: border-box; }
-        .container { background: var(--card); padding: 1.5rem; border-radius: 24px; width: 100%; max-width: 400px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
-        h1 { font-size: 1.2rem; color: var(--accent); text-align: center; margin-bottom: 1rem; }
-        .status { font-size: 0.7rem; color: var(--text-dim); text-align: center; margin-bottom: 1rem; }
-        .tasa-box { background: rgba(56, 189, 248, 0.05); border-radius: 16px; padding: 1rem; margin-bottom: 1.5rem; border: 1px dashed var(--accent); text-align: center; }
-        .tasa-valor { font-size: 2rem; font-weight: 800; margin: 5px 0; color: var(--success); }
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #38bdf8;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --success: #4ade80;
+            --danger: #f87171;
+            --radius: 12px;
+            --radius-lg: 16px;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+        }
+        .container {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 420px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 30px -10px rgba(0,0,0,0.6);
+        }
+        h1 {
+            font-size: 1.2rem;
+            color: var(--accent);
+            text-align: center;
+            margin: 0 0 0.25rem 0;
+        }
+        .version { font-size: 0.65rem; opacity: 0.5; font-weight: 600; margin-left: 4px; }
+        .status {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-align: center;
+            margin-bottom: 1rem;
+            min-height: 1.2em;
+            transition: color 0.3s;
+        }
+        .tasa-box {
+            background: rgba(56, 189, 248, 0.05);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border: 1px dashed var(--accent);
+            text-align: center;
+        }
+        .tasa-box .label {
+            font-size: 0.7rem;
+            color: var(--accent);
+            letter-spacing: 0.5px;
+        }
+        .tasa-valor {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 5px 0;
+            color: var(--success);
+            transition: color 0.3s;
+        }
+        .tasa-valor.outdated { color: var(--danger); }
         .input-group { margin-bottom: 1rem; text-align: left; }
-        label { display: block; font-size: 0.75rem; margin-bottom: 5px; color: var(--text-dim); }
+        label {
+            display: block;
+            font-size: 0.75rem;
+            margin-bottom: 5px;
+            color: var(--text-dim);
+        }
         .input-wrapper { position: relative; }
-        .input-wrapper span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-size: 0.9rem; }
-        input { width: 100%; padding: 12px 12px 12px 35px; background: #0f172a; border: 1px solid #334155; border-radius: 12px; color: white; font-size: 1.1rem; box-sizing: border-box; }
-        .igtf-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.85rem; }
+        .input-wrapper span {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 12px 12px 35px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: var(--radius);
+            color: white;
+            font-size: 1.1rem;
+            transition: border-color 0.2s;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .igtf-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            padding: 10px 15px;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+        }
         .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .4s; border-radius: 20px; }
-        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #334155;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px; width: 14px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
         input:checked + .slider { background-color: var(--accent); }
         input:checked + .slider:before { transform: translateX(20px); }
-        .copy-btn { background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; text-decoration: underline; margin-top: 10px; width: 100%; }
-        
-        /* Estilo para el nuevo link del BCV */
-        .bcv-link { display: block; text-align: center; margin-top: 20px; font-size: 0.7rem; color: var(--text-dim); text-decoration: none; transition: 0.3s; opacity: 0.7; }
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 0.75rem;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 10px;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+        .copy-btn:active { opacity: 0.7; }
+        .bcv-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: 0.3s;
+            opacity: 0.7;
+        }
         .bcv-link:hover { color: var(--accent); opacity: 1; text-decoration: underline; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>BCV Converter <small style="opacity:0.5">v2.3</small></h1>
-    <div id="fecha" class="status">Sincronizando...</div>
+    <h1>BCV Converter <span class="version">v2.5</span></h1>
+    <div id="fecha" class="status">⟳ Cargando tasa del BCV...</div>
 
     <div class="tasa-box">
-        <div style="font-size: 0.7rem; color: var(--accent);">TASA OFICIAL USD/VES</div>
+        <div class="label">TASA OFICIAL USD/VES</div>
         <div id="tasa-display" class="tasa-valor">0,00</div>
     </div>
 
@@ -61,7 +190,7 @@
         </label>
     </div>
 
-    <button class="copy-btn" onclick="copiar()">COPIAR MONTO (Bs.)</button>
+    <button class="copy-btn" onclick="copiar()">📋 COPIAR MONTO (Bs.)</button>
     
     <a href="https://www.bcv.org.ve/" target="_blank" class="bcv-link">
         🌐 Consultar BCV Oficial (Página del Banco)
@@ -69,51 +198,86 @@
 </div>
 
 <script>
-    // 🔗 RECUERDA PEGAR TU URL AQUÍ
+    // ⚠️ REEMPLAZA CON LA URL REAL DE TU APLICACIÓN WEB DE APPS SCRIPT
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyNM41pbVKMjKcTCFl_YrzAJl6jY3Lsqsuqs8XVyqeZOOv1UrfXfyyn1wQx1yV6FYazww/exec";
 
+    const STORAGE_KEY = 'bcv_converter_v2.5';
     let tasaActual = 0;
 
-    // Función para poner puntos de miles y comas decimales
+    // Elementos del DOM
+    const tasaDisplay = document.getElementById('tasa-display');
+    const fechaEl = document.getElementById('fecha');
+    const inputUSD = document.getElementById('input-usd');
+    const inputVES = document.getElementById('input-ves');
+    const igtfCheck = document.getElementById('igtf-check');
+
     function formatearParaMostrar(numero) {
-        return new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(numero);
+        return new Intl.NumberFormat('es-ES', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 4
+        }).format(numero);
     }
 
     async function obtenerDatos() {
         try {
             const res = await fetch(WEB_APP_URL);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
             const data = await res.json();
-            if(data.tasa) {
+            if (data.tasa) {
                 tasaActual = parseFloat(data.tasa);
-                // Aquí aplicamos el formato de miles al número grande
-                document.getElementById('tasa-display').innerText = formatearParaMostrar(tasaActual);
-                document.getElementById('fecha').innerText = "Corte: " + data.actualizacion;
+                tasaDisplay.innerText = formatearParaMostrar(tasaActual);
+                tasaDisplay.classList.remove('outdated');
+                const fechaTexto = data.actualizacion || '';
+                fechaEl.innerHTML = '✅ Actualizado: ' + fechaTexto;
+                // Guardar en localStorage
+                const cache = { tasa: data.tasa, fecha: fechaTexto, timestamp: Date.now() };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(cache));
+            } else {
+                throw new Error('Tasa no disponible');
             }
         } catch (e) {
-            document.getElementById('fecha').innerText = "⚠️ Error de conexión";
+            console.warn('Error al obtener tasa:', e.message);
+            // Intentar cargar desde localStorage
+            const cached = localStorage.getItem(STORAGE_KEY);
+            if (cached) {
+                try {
+                    const cacheObj = JSON.parse(cached);
+                    tasaActual = parseFloat(cacheObj.tasa);
+                    tasaDisplay.innerText = formatearParaMostrar(tasaActual);
+                    tasaDisplay.classList.add('outdated');
+                    fechaEl.innerHTML = '⚠️ Tasa no actualizada. Última: ' + cacheObj.fecha;
+                } catch (parseErr) {
+                    mostrarErrorConexion();
+                }
+            } else {
+                mostrarErrorConexion();
+            }
         }
+    }
+
+    function mostrarErrorConexion() {
+        tasaDisplay.innerText = '0,00';
+        tasaDisplay.classList.add('outdated');
+        fechaEl.innerHTML = '🔴 No se pudo obtener la tasa';
     }
 
     function convertir(origen) {
         if (tasaActual === 0) return;
-        const usdIn = document.getElementById('input-usd');
-        const vesIn = document.getElementById('input-ves');
-        const igtf = document.getElementById('igtf-check').checked;
-        const factorIgtf = igtf ? 1.03 : 1;
+        const igtf = igtfCheck.checked;
+        const factor = igtf ? 1.03 : 1;
 
         if (origen === 'USD') {
-            const v = parseFloat(usdIn.value);
-            vesIn.value = !isNaN(v) ? (v * tasaActual * factorIgtf).toFixed(2) : "";
+            const v = parseFloat(inputUSD.value);
+            inputVES.value = !isNaN(v) ? (v * tasaActual * factor).toFixed(2) : "";
         } else {
-            const v = parseFloat(vesIn.value);
-            usdIn.value = !isNaN(v) ? (v / (tasaActual * factorIgtf)).toFixed(2) : "";
+            const v = parseFloat(inputVES.value);
+            inputUSD.value = !isNaN(v) ? (v / (tasaActual * factor)).toFixed(2) : "";
         }
     }
 
     function copiar() {
-        const ves = document.getElementById('input-ves').value;
-        if(ves) {
-            // Formateamos el número antes de copiarlo al portapapeles
+        const ves = inputVES.value;
+        if (ves) {
             const montoFormateado = formatearParaMostrar(parseFloat(ves));
             navigator.clipboard.writeText(montoFormateado + " Bs.");
             alert("Copiado: " + montoFormateado + " Bs.");
@@ -122,6 +286,5 @@
 
     window.onload = obtenerDatos;
 </script>
-
 </body>
 </html>
