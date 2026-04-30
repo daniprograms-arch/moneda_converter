@@ -228,7 +228,7 @@
                 tasaDisplay.innerText = formatearParaMostrar(tasaActual);
                 tasaDisplay.classList.remove('outdated');
                 const fechaTexto = data.actualizacion || '';
-                fechaEl.innerHTML = '✅ Actualizado: ' + fechaTexto;
+                fechaEl.innerHTML = '✅ ' + fechaTexto;
                 // Guardar en localStorage
                 const cache = { tasa: data.tasa, fecha: fechaTexto, timestamp: Date.now() };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(cache));
