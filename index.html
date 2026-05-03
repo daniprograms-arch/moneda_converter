@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>CONSULTA DEL DIA v2.5</title>
+    <title>DC CONVERTER 💹</title>
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- html2canvas para captura de pantalla -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --bg: #0f172a;
@@ -41,18 +43,17 @@
             box-shadow: 0 25px 30px -10px rgba(0,0,0,0.6);
         }
         h1 {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: var(--accent);
             text-align: center;
             margin: 0 0 0.25rem 0;
         }
-        .version { font-size: 0.65rem; opacity: 0.5; font-weight: 600; margin-left: 4px; }
         .status {
-            font-size: 0.7rem;
+            font-size: 0.9rem;           /* ← Antes 0.7rem */
             color: var(--text-dim);
             text-align: center;
             margin-bottom: 1rem;
-            min-height: 1.2em;
+            min-height: 1.4em;
             transition: color 0.3s;
         }
         .tasa-box {
@@ -138,35 +139,63 @@
         }
         input:checked + .slider { background-color: var(--accent); }
         input:checked + .slider:before { transform: translateX(20px); }
-        .copy-btn {
-            background: none;
-            border: none;
+
+        /* ----- NUEVOS ESTILOS PARA BOTONES EN LÍNEA Y CAPTURA ----- */
+        .action-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        .action-btn {
+            flex: 1;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid var(--accent);
             color: var(--accent);
-            font-size: 0.75rem;
+            border-radius: var(--radius);
+            padding: 10px 0;
+            font-size: 0.8rem;
+            font-weight: 600;
             cursor: pointer;
-            text-decoration: underline;
-            margin-top: 10px;
-            width: 100%;
-            transition: opacity 0.2s;
-        }
-        .copy-btn:active { opacity: 0.7; }
-        .bcv-link {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            font-size: 0.7rem;
-            color: var(--text-dim);
+            transition: background 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             text-decoration: none;
-            transition: 0.3s;
-            opacity: 0.7;
         }
-        .bcv-link:hover { color: var(--accent); opacity: 1; text-decoration: underline; }
+        .action-btn:hover {
+            background: var(--accent);
+            color: #0f172a;
+        }
+        .capture-btn {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px dashed #94a3b8;
+            color: #94a3b8;
+            border-radius: var(--radius);
+            padding: 12px 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .capture-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-color: white;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>BCV Converter <span class="version">v2.5</span></h1>
+    <h1>DC CONVERTER 💹</h1>
     <div id="fecha" class="status">⟳ Cargando tasa del BCV...</div>
 
     <div class="tasa-box">
@@ -192,11 +221,14 @@
         </label>
     </div>
 
-    <button class="copy-btn" onclick="copiar()">📋 COPIAR MONTO (Bs.)</button>
-    
-    <a href="https://www.bcv.org.ve/" target="_blank" class="bcv-link">
-        🌐 Consultar BCV Oficial (Página del Banco)
-    </a>
+    <!-- Botones funcionales en línea -->
+    <div class="action-row no-captura">
+        <button class="action-btn" onclick="copiar()">📋 Copiar monto</button>
+        <a class="action-btn" href="https://www.bcv.org.ve/" target="_blank">🌐 BCV Oficial</a>
+    </div>
+
+    <!-- Botón de captura de pantalla -->
+    <button class="capture-btn no-captura" onclick="capturarPantalla()">📸 Capturar pantalla</button>
 </div>
 
 <script>
@@ -281,6 +313,57 @@
             navigator.clipboard.writeText(montoFormateado + " Bs.");
             alert("Copiado: " + montoFormateado + " Bs.");
         }
+    }
+
+    // Captura de pantalla
+    function capturarPantalla() {
+        const target = document.querySelector('.container');
+        if (!target) return;
+
+        // Ocultamos elementos que no deben salir en la imagen
+        const ocultos = target.querySelectorAll('.no-captura');
+        const displaysOriginales = [];
+        ocultos.forEach(el => {
+            displaysOriginales.push(el.style.display);
+            el.style.display = 'none';
+        });
+
+        // Aviso visual
+        const aviso = document.createElement('div');
+        aviso.textContent = 'Generando captura...';
+        Object.assign(aviso.style, {
+            position: 'fixed', bottom: '20px', left: '50%',
+            transform: 'translateX(-50%)', backgroundColor: '#333',
+            color: 'white', padding: '10px 20px', borderRadius: '10px',
+            zIndex: '9999'
+        });
+        document.body.appendChild(aviso);
+
+        html2canvas(target, {
+            scale: 2,
+            backgroundColor: '#0f172a',
+            logging: false
+        }).then(canvas => {
+            document.body.removeChild(aviso);
+            // Restaurar elementos
+            ocultos.forEach((el, idx) => {
+                el.style.display = displaysOriginales[idx];
+            });
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'DC_CONVERTER.png';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }).catch(error => {
+            document.body.removeChild(aviso);
+            ocultos.forEach((el, idx) => {
+                el.style.display = displaysOriginales[idx];
+            });
+            alert('Error al generar captura: ' + error.message);
+        });
     }
 
     window.onload = obtenerDatos;
